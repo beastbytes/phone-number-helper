@@ -11,6 +11,11 @@ Search.appendIndex(
             "summary": "Convert\u0020an\u0020international\u0020phone\u0020number\u0020in\u0020ITU\u002DT\u0020Recommendation\u0020E.123\u0020format\u0020to\u0020EPP\u0020format",
             "url": "classes/BeastBytes-PhoneNumber-Helper-PhoneNumber.html#method_itu2Epp"
         },                {
+            "fqsen": "\\BeastBytes\\PhoneNumber\\Helper\\PhoneNumber\u003A\u003AformatN6l\u0028\u0029",
+            "name": "formatN6l",
+            "summary": "Formats\u0020national\u0020phone\u0020numbers",
+            "url": "classes/BeastBytes-PhoneNumber-Helper-PhoneNumber.html#method_formatN6l"
+        },                {
             "fqsen": "\\BeastBytes\\PhoneNumber\\Helper\\PhoneNumber\u003A\u003APATTERN",
             "name": "PATTERN",
             "summary": "",
