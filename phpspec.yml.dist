@@ -1,5 +1,0 @@
-formatter.name: pretty
-suites:
-    phone_number_suite:
-        namespace: BeastBytes\PhoneNumber\Helper
-        psr4_prefix: BeastBytes\PhoneNumber\Helper

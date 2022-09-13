@@ -31,6 +31,7 @@ phpunit.phar
 
 # local phpunit config
 /phpunit.xml
+/phpunit.xml.dist
 
 # NPM packages
 /node_modules
@@ -41,6 +42,3 @@ c3.php
 
 # Composer
 # composer.lock
-
-# phpDocumentor cache
-/docs/cache

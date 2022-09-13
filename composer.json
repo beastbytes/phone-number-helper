@@ -1,7 +1,7 @@
 {
     "name": "beastbytes/phone-number-helper",
     "type": "library",
-    "description": "Helper methods to convert the format of phone numbers",
+    "description": "Helper methods to format national and convert the format of international phone numbers",
     "keywords": [
         "phone number"
     ],
@@ -13,16 +13,21 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^7.4|^8.0"
+        "php": "^8.0"
     },
     "require-dev": {
-        "phpspec/phpspec": "^7.1",
+        "phpunit/phpunit": "^9.5",
         "roave/security-advisories": "dev-latest",
         "vimeo/psalm": "^4.3"
     },
     "autoload": {
         "psr-4": {
             "BeastBytes\\PhoneNumber\\Helper\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests"
         }
     }
 }
