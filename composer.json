@@ -1,9 +1,14 @@
 {
     "name": "beastbytes/phone-number-helper",
     "type": "library",
-    "description": "Helper methods to format national and convert the format of international phone numbers",
+    "description": "Helper methods to format national phone numbers according to national numbering plans and convert the format of international phone numbers from ITU E.123 to EPP format",
     "keywords": [
-        "phone number"
+        "phone number",
+        "epp",
+        "itu",
+        "itu-t",
+        "E.123",
+        "E.164"
     ],
     "license": "BSD-3-Clause",
     "authors": [{
@@ -13,7 +18,8 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^8.0"
+        "php": "^8.0",
+        "beastbytes/phone-number-formats": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",

@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace BeastBytes\PhoneNumber\Helper;
 
+use BeastBytes\PhoneNumber\N6lFormats\N6lFormatInterface;
+
 final class PhoneNumber
 {
     /**
@@ -43,40 +45,31 @@ final class PhoneNumber
      * Formats national phone numbers
      *
      * @param string $value Phone number to be formatted
-     * @param ?string|array $countries List of countries to check. If null all the countries in $n6lPatterns are
-     * checked.
-     * @param array|null $n6lPatterns National patterns to use for formatting. Array keys are the countries; the values
-     * are either:
-     * * false - the country is not available
-     * * string - regex pattern to match. In this case the phone number is returned unaltered if it matches
-     * * array - the first element is the regex pattern to match and the second the replacement pattern
+     * @param string $country ISO 3166 alpha-2 country code
+     * @param N6lFormatInterface $n6lFormats
      * @return string The formatted phone number
      * @throws \InvalidArgumentException If no match is found
      */
-    public static function formatN6l(string $value, string|array $countries = null, ?array $n6lPatterns = null): string
+    public static function formatN6l(
+        string $value,
+        string $country,
+        N6lFormatInterface $n6lFormats
+    ): string
     {
-        if ($n6lPatterns === null) {
-            $n6lPatterns = require(__DIR__ . DIRECTORY_SEPARATOR . 'n6lPatterns.php');
-        }
-
-        if ($countries === null) {
-            $countries = array_keys($n6lPatterns);
-        } elseif (is_string($countries)) {
-            $countries = [$countries];
-        }
-
-        foreach ($countries as $country) {
-            if (array_key_exists($country, $n6lPatterns)) {
-                if (is_string($n6lPatterns[$country]) && preg_match($n6lPatterns[$country], $value)) {
-                    return $value;
-                }
-
-                if (is_array($n6lPatterns[$country]) && preg_match($n6lPatterns[$country][0], $value)) {
-                    return trim(preg_replace($n6lPatterns[$country][0], $n6lPatterns[$country][1], $value));
-                }
+        $pattern = $n6lFormats->getPattern($country);
+        if (preg_match($pattern, $value)) {
+            if ($n6lFormats->hasReplacement($country)) {
+                return trim(preg_replace($pattern, $n6lFormats->getReplacement($country), $value));
             }
+            return $value;
         }
 
-        throw new \InvalidArgumentException('No match found for phone number');
+        throw new \InvalidArgumentException(strtr(
+            'Phone number {value} does not match country {country} pattern',
+            [
+                '{country}' => $country,
+                '{value}' => $value,
+            ]
+        ));
     }
 }
