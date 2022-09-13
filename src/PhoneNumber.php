@@ -8,17 +8,12 @@ declare(strict_types=1);
 
 namespace BeastBytes\PhoneNumber\Helper;
 
-/**
- *
- * @author Chris Yates
- * @package phoneNumberHelper
- */
 final class PhoneNumber
 {
     /**
      * @var string Regex pattern to extract parts of international phone numbers
      */
-    private const PATTERN = '/^(\+\d{1,3})\D+((\d+[\s\.-]*)+)([\D]+(\d+))?/';
+    private const PATTERN = '/^(\+\d{1,3})\D+((\d+[\s.-]*)+)(\D+(\d+))?/';
 
     /**
      * Convert an international phone number in ITU-T Recommendation E.123 format to EPP format
@@ -39,8 +34,8 @@ final class PhoneNumber
         // $matches[1] => country code
         // $matches[2] => national significant number, potentially containing non-digits (e.g. white space)
         // $matches[5] => extension - if given
-        return $matches[1] .
-            '.' . preg_replace('/(\D)/', '', $matches[2])
+        return $matches[1]
+            . '.' . preg_replace('/(\D)/', '', $matches[2])
             . (isset($matches[5]) ? 'x' . $matches[5] : '');
     }
 
@@ -58,7 +53,7 @@ final class PhoneNumber
      * @return string The formatted phone number
      * @throws \InvalidArgumentException If no match is found
      */
-    public function formatN6l(string $value, string|array $countries = null, ?array $n6lPatterns = null): string
+    public static function formatN6l(string $value, string|array $countries = null, ?array $n6lPatterns = null): string
     {
         if ($n6lPatterns === null) {
             $n6lPatterns = require(__DIR__ . DIRECTORY_SEPARATOR . 'n6lPatterns.php');
