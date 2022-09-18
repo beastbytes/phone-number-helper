@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace BeastBytes\PhoneNumber\Helper;
 
-use BeastBytes\PhoneNumber\N6lFormats\N6lFormatInterface;
+use BeastBytes\N6lPhoneNumber\N6lPhoneNumberDataInterface;
 
 final class PhoneNumber
 {
@@ -36,30 +36,32 @@ final class PhoneNumber
         // $matches[1] => country code
         // $matches[2] => national significant number, potentially containing non-digits (e.g. white space)
         // $matches[5] => extension - if given
-        return $matches[1]
-            . '.' . preg_replace('/(\D)/', '', $matches[2])
+        return $matches[1] . '.'
+            . preg_replace('/(\D)/', '', $matches[2])
             . (isset($matches[5]) ? 'x' . $matches[5] : '');
     }
 
     /**
-     * Formats national phone numbers
+     * Formats national phone numbers.
+     *
+     * Formatting includes number grouping, group separators, etc.
      *
      * @param string $value Phone number to be formatted
-     * @param string $country ISO 3166 alpha-2 country code
-     * @param N6lFormatInterface $n6lFormats
+     * @param string $country The country whose format to use
+     * @param N6lPhoneNumberDataInterface $n6lPhoneNumberData
      * @return string The formatted phone number
-     * @throws \InvalidArgumentException If no match is found
+     * @throws \InvalidArgumentException If the phone number is not in an acceptable format for the country
      */
     public static function formatN6l(
         string $value,
         string $country,
-        N6lFormatInterface $n6lFormats
+        N6lPhoneNumberDataInterface $n6lPhoneNumberData
     ): string
     {
-        $pattern = $n6lFormats->getPattern($country);
+        $pattern = $n6lPhoneNumberData->getPattern($country);
         if (preg_match($pattern, $value)) {
-            if ($n6lFormats->hasReplacement($country)) {
-                return trim(preg_replace($pattern, $n6lFormats->getReplacement($country), $value));
+            if ($n6lPhoneNumberData->hasReplacement($country)) {
+                return trim(preg_replace($pattern, $n6lPhoneNumberData->getReplacement($country), $value));
             }
             return $value;
         }
