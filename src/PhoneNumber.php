@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace BeastBytes\PhoneNumber\Helper;
 
-use BeastBytes\N6lPhoneNumber\N6lPhoneNumberDataInterface;
+use BeastBytes\PhoneNumber\N6l\N6lPhoneNumberDataInterface;
 
 final class PhoneNumber
 {
