@@ -1,24 +1,21 @@
 <?php
 
-namespace Tests;
+namespace BeastBytes\PhoneNumber\Helper\Tests;
 
 use BeastBytes\PhoneNumber\N6l\PHP\N6lPhoneNumberData;
 use BeastBytes\PhoneNumber\Helper\PhoneNumber;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class PhoneNumberTest extends TestCase
 {
-    /**
-     * @dataProvider itu2eppProvider
-     */
+    #[DataProvider('itu2eppProvider')]
     function test_it_converts_from_itu_format_to_epp_format($epp, $itu)
     {
         $this->assertSame($epp, PhoneNumber::itu2Epp($itu));
     }
 
-    /**
-     * @dataProvider badItuProvider
-     */
+    #[DataProvider('badItuProvider')]
     function test_it_throws_an_exception_if_phone_number_not_in_itu_format($badItu)
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -27,9 +24,7 @@ class PhoneNumberTest extends TestCase
         PhoneNumber::itu2Epp($badItu);
     }
 
-    /**
-     * @dataProvider nationalPhoneNumberProvider
-     */
+    #[DataProvider('nationalPhoneNumberProvider')]
     function test_it_formats_national_phone_numbers($formattedNumber, $originalNumber, $countries)
     {
         $this->assertSame(
@@ -38,9 +33,7 @@ class PhoneNumberTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider badNationalPhoneNumberProvider
-     */
+    #[DataProvider('badNationalPhoneNumberProvider')]
     function test_it_throws_an_exception_if_phone_number_not_in_national_format($phoneNumber, $country)
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -48,9 +41,7 @@ class PhoneNumberTest extends TestCase
         PhoneNumber::formatN6l($phoneNumber, $country, new N6lPhoneNumberData());
     }
 
-    /**
-     * @dataProvider badCountryProvider
-     */
+    #[DataProvider('badCountryProvider')]
     function test_it_throws_an_exception_if_bad_country(string $country)
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -58,9 +49,9 @@ class PhoneNumberTest extends TestCase
         PhoneNumber::formatN6l('202-456-2122', $country, new N6lPhoneNumberData());
     }
 
-    public function itu2eppProvider()
+    public function itu2eppProvider(): \Generator
     {
-        return [ // epp, itu
+        foreach ([ // epp, itu
             ['+44.2079250918', '+44 20 7925 0918'],
             ['+44.2079250918', '+44 20-7925-0918'],
             ['+44.2079250918', '+44 20.7925.0918'],
@@ -69,45 +60,55 @@ class PhoneNumberTest extends TestCase
             ['+1.2024562121x123', '+1 202-456-2121#123'],
             ['+44.2079250918', '+44.2079250918'], // ITU also matches EPP
             ['+1.2024562121', '+1.2024562121'],
-        ];
+        ] as $name => $data) {
+            yield $name => $data;
+        }
     }
 
-    public function badItuProvider()
+    public function badItuProvider(): \Generator
     {
-        return [
+        foreach ([
             'UK local number 1' => ['020-7925-0918'],
             'UK local number 2' => ['0300 126 7000'],
             'US local number' => ['202-456-2121'],
             'no leading `+`' => ['44 20 7925 0918'],
-        ];
+        ] as $name => $data) {
+            yield $name => $data;
+        }
     }
 
-    public function nationalPhoneNumberProvider()
+    public function nationalPhoneNumberProvider(): \Generator
     {
-        return [ // expected result, number, countries
+        foreach ([ // expected result, number, countries
             ['020 79250918', '020-7925-0918', 'GB'],
             ['0300 1267000', '0300 126 7000', 'GB'],
             ['(202) 456-2121', '202-456-2121', 'US'],
             ['12345678', '12345678', 'SZ'],
-        ];
+        ] as $name => $data) {
+            yield $name => $data;
+        }
     }
 
-    public function badNationalPhoneNumberProvider()
+    public function badNationalPhoneNumberProvider(): \Generator
     {
-        return [
+        foreach ([
             'International number' => ['+44 20 7925 0918',  'GB'],
             'US number, Spanish format' => ['202-456-2121',  'ES'],
-        ];
+        ] as $name => $data) {
+            yield $name => $data;
+        }
     }
 
-    public function badCountryProvider(): array
+    public function badCountryProvider(): \Generator
     {
-        return [
+        foreach ([
             'non-existent code' => ['XX'],
             'alpha-3 code' => ['GBR'],
             'too short' => ['G'],
             'too long' => ['GBRT'],
             'number string' => ['12']
-        ];
+        ] as $name => $data) {
+            yield $name => $data;
+        }
     }
 }
