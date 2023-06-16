@@ -6,7 +6,7 @@
         ]
     },
     "logs": {
-        "text": "infection.log",
+        "text": "logs/infection.log",
         "stryker": {
             "badge": "/^release-.*$/"
         }
@@ -15,7 +15,7 @@
         "@default": true,
         "IncrementInteger": {
             "ignore": [
-                "BeastBytes\\PhoneNumber\\Helper::PhoneNumber::43"
+                "BeastBytes\\PhoneNumber\\Helper\\PhoneNumber::itu2Epp::43"
             ]
         }
     },
