@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Copyright (c) 2023 BeastBytes - All Rights Reserved
+ * @copyright Copyright (c) 2024 BeastBytes - All Rights Reserved
  * @license BSD 3-Clause
  */
 
@@ -13,10 +13,51 @@ use InvalidArgumentException;
 
 final class PhoneNumber
 {
+    public const INVALID_ITU_FORMAT_MESSAGE = 'Phone number not in ITU format';
+    public const INVALID_N6L_PHONE_NUMBER_MESSAGE = '{value} is not a valid national phone number for {country}';
     /**
      * @var string Regex pattern to extract parts of international phone numbers
      */
     private const PATTERN = '/^(\+\d{1,3})\D+((\d+[\s.-]*)+)(\D+(\d+))?/';
+
+    /**
+     * Formats national phone numbers.
+     *
+     * Formatting includes number grouping, group separators, etc.
+     * If there is not a replacement format for the country the phone is returned unchanged.
+     *
+     * @param string $value Phone number to be formatted
+     * @param string $country The country whose format to use
+     * @param N6lPhoneNumberDataInterface $n6lPhoneNumberData
+     * @return string The formatted phone number
+     * @throws InvalidArgumentException If the phone number is not an acceptable format for the country
+     */
+    public static function formatN6l(
+        string $value,
+        string $country,
+        N6lPhoneNumberDataInterface $n6lPhoneNumberData
+    ): string
+    {
+        /** @psalm-var array{pattern: non-empty-string, replacement?: non-empty-string} $n6l */
+        $n6l = $n6lPhoneNumberData->getN6l($country);
+
+        $result = preg_match($n6l['pattern'], $value);
+
+        if ((bool) $result === false) {
+            throw new InvalidArgumentException(strtr(
+                self::INVALID_N6L_PHONE_NUMBER_MESSAGE,
+                [
+                    '{value}' => $value,
+                    '{country}' => $country,
+                ]
+            ));
+        }
+
+        return (array_key_exists('replacement', $n6l)
+            ? preg_replace($n6l['pattern'], $n6l['replacement'], $value)
+            : $value
+        );
+    }
 
     /**
      * Convert an international phone number in ITU-T Recommendation E.123 format to EPP format
@@ -30,8 +71,8 @@ final class PhoneNumber
      */
     public static function itu2Epp(string $value): string
     {
-        if (preg_match(self::PATTERN, $value, $matches) === 0) {
-            throw new InvalidArgumentException('Phone number not in ITU format');
+        if (!(bool) preg_match(self::PATTERN, $value, $matches)) {
+            throw new InvalidArgumentException(self::INVALID_ITU_FORMAT_MESSAGE);
         }
 
         // $matches[1] => country code
@@ -44,9 +85,7 @@ final class PhoneNumber
     }
 
     /**
-     * Formats national phone numbers.
-     *
-     * Formatting includes number grouping, group separators, etc.
+     * Converts a national number to EPP format
      *
      * @param string $value Phone number to be formatted
      * @param string $country The country whose format to use
@@ -54,26 +93,45 @@ final class PhoneNumber
      * @return string The formatted phone number
      * @throws InvalidArgumentException If the phone number is not in an acceptable format for the country
      */
-    public static function formatN6l(
+    public static function n6l2Epp(
         string $value,
         string $country,
         N6lPhoneNumberDataInterface $n6lPhoneNumberData
     ): string
     {
-        $pattern = $n6lPhoneNumberData->getPattern($country);
-        if (preg_match($pattern, $value)) {
-            if ($n6lPhoneNumberData->hasReplacement($country)) {
-                return trim(preg_replace($pattern, $n6lPhoneNumberData->getReplacement($country), $value));
-            }
-            return $value;
+        /** @psalm-var array{pattern: non-empty-string, replacement?: non-empty-string} $epp */
+        $n6l = $n6lPhoneNumberData->getN6l($country);
+
+        if (!(bool) preg_match($n6l['pattern'], $value)) {
+            throw new InvalidArgumentException(strtr(
+                self::INVALID_N6L_PHONE_NUMBER_MESSAGE,
+                [
+                    '{value}' => $value,
+                    '{country}' => $country,
+                ]
+            ));
         }
 
-        throw new InvalidArgumentException(strtr(
-            'Phone number {value} does not match country {country} pattern',
-            [
-                '{country}' => $country,
-                '{value}' => $value,
-            ]
-        ));
+        /** @psalm-var array{pattern?: non-empty-string, idc: non-empty-string} $epp */
+        $epp = $n6lPhoneNumberData->getEpp($country);
+        $ext = '';
+
+        // Extract extension
+        $pos = strrpos($value, '#');
+        if ($pos === false) {
+            $pos = strrpos($value, 'x');
+        }
+
+        if (is_int($pos)) {
+            $ext = 'x' . substr($value, ++$pos);
+            $value = substr($value, 0, $pos);
+        }
+        //
+
+        if (array_key_exists('pattern', $epp)) {
+            $value = preg_replace($epp['pattern'], '', $value);
+        }
+
+        return '+' . $epp['idc'] . '.' . $value . $ext;
     }
 }
